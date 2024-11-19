@@ -2,6 +2,17 @@
 
 This repository reproduces an issue with Scala 3 where the compiler reports a `SuspendException` on a clean compile.
 
+There are 4 files involved:
+
+1. [`Visitor.scala`](src/main/scala/example/Visitor.scala) -- defines `BaseVisitor` and `VisitorType` traits
+2. [`VisitorMacros.scala`](src/main/scala/example/VisitorMacros.scala) -- defines a macro that produces an instance of `VisitorType`
+    1. The `Out` type of the generated `VisitorType` is a refined `Selectable` type with value members for all of the type members of the given type `T`
+3. [`Test.scala`](src/main/scala/example/Test.scala):
+    1. Defines `sealed trait Test` with one member, `case object Foo`
+    2. Defines a `val visitorType: VisitorType[Test]` via a macro invocation
+    3. Defines `trait Visitor[A]` which refers to `visitorType.Out`
+4. [`UsesTest.scala`](src/main/scala/example/UsesTest.scala) -- simply refers to `Test.Foo`. This file causes the error
+
 To reproduce:
 
 1. Clone this repo
